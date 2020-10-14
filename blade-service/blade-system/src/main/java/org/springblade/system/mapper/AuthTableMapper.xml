@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.springblade.system.mapper.AuthTableMapper">
+    <resultMap id="authTableMap" type="org.springblade.system.entity.AuthTable">
+        <id column="id" property="id" />
+        <result column="TABLE_NAME" property="tableName" />
+        <result column="SERVER_ID" property="serverId" />
+    </resultMap>
+    <select id="selectByParam" resultMap="authTableMap" parameterType="java.util.Map">
+        select * from `blade_auth_table`
+        <where>
+            <trim prefixOverrides="and">
+                <if test="tableName!=null">
+                    and TABLE_NAME=#{tableName}
+                </if>
+                <if test="serverId!=null">
+                    and SERVER_ID=#{serverId}
+                </if>
+            </trim>
+        </where>
+    </select>
+    <select id="getTableInfo" parameterType="java.util.Map" resultType="org.springblade.system.entity.AuthTable">
+        select a.id,a.table_name tableName,a.server_id serverId from `blade_auth_table` a
+        join
+        (select distinct table_id from `blade_role_table`
+        where
+        <choose>
+            <when test="roleIds!=null">
+                role_id in
+                <foreach collection="roleIds" item="id" index="index" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </when>
+            <otherwise>
+                role_id = #{roleId}
+            </otherwise>
+        </choose>
+            ) b
+        on a.id=b.table_id
+    </select>
+</mapper>
